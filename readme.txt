@@ -18,7 +18,7 @@ une fois le serveur lancer pour aller sur la page d'accueil il suffit de taper l
 
 http://xxx.xxx.x.xxx:8000/ en remplacant biensur les x par votre adresse ip,
 
-une fois à l'accueil vous pourrez naviguer dans les différentes pages, comme décrit dans le fichier txt Partie .
+une fois à l'accueil vous pourrez naviguer dans les différentes pages, comme décrit dans le fichier txt Partie 3.
 
 Les différentes routes pour les questions des parties 2 sont dans les codes du serveur (route pour voir la meteo, pour visualiser le graphique des factures etc)
 
