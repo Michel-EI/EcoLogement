@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>État des Capteurs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .green {
+            background-color: green;
+        }
+        .orange {
+            background-color: orange;
+        }
+        .red {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">EcoLogement</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active"  href="/">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/gestion_logements">Gestion des Logements</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/consommation">Consommation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/etat_capteurs">État des Capteurs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"  href="/economies">Économies</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/configuration">Configuration</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="text-center">État des Capteurs</h1>
+        <div class="row mt-4" id="capteursContainer">
+            <!-- Les capteurs seront chargés ici -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const capteursContainer = document.getElementById("capteursContainer");
+
+            async function fetchCapteurs() {
+                try {
+                    const response = await fetch("/api/capteurs");
+                    if (!response.ok) throw new Error("Erreur lors de la récupération des capteurs");
+                    
+                    const capteurs = await response.json();
+                    afficherCapteurs(capteurs);
+                } catch (error) {
+                    console.error(error);
+                    capteursContainer.innerHTML = `
+                        <div class="alert alert-danger">Impossible de charger les capteurs.</div>
+                    `;
+                }
+            }
+
+            function afficherCapteurs(capteurs) {
+                capteursContainer.innerHTML = capteurs.map(capteur => `
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${capteur.nom_type} - ${capteur.reference_commerciale}</h5>
+                                <p class="card-text">
+                                    Nombre de mesures : ${capteur.nb_mesures}<br>
+                                    État : <span class="status-indicator ${capteur.couleur}"></span> ${capteur.etat}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                `).join("");
+            }
+
+            fetchCapteurs();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+Partie 3
+
+Création du site, avec différentes pages/
+
+EcoLogement est une application web conçue pour faciliter la gestion des logements éco-responsables en offrant des outils d'analyse de consommation et de gestion des équipements connectés. Voici la structure du site :
+
+Accueil :
+
+Page d'accueil avec une présentation de l'application et des fonctionnalités principales.
+
+Gestion des Logements :
+
+Affiche la liste des logements enregistrés dans la base de données.
+Permet de visualiser et d'ajouter des pièces à chaque logement.
+Gestion des Pièces :
+
+Permet de gérer les pièces associées à un logement.
+Ajout, modification ou suppression des pièces.
+Consommation :
+
+Affiche des graphiques détaillant la consommation électrique et d'eau.
+Les données proviennent des capteurs connectés et permettent une comparaison avec des seuils de référence.
+État des Capteurs :
+
+Liste les capteurs installés et leur état basé sur leur activité.
+Indicateurs visuels (jauges) pour évaluer leur état : récent, endommagé ou critique.
+Économies :
+
+Graphiques comparant les coûts réels de consommation aux coûts de référence pour évaluer les économies réalisées.
+Configuration :
+
+Permet d'ajouter ou de supprimer des capteurs pour une pièce spécifique.
+Les types de capteurs disponibles sont affichés dynamiquement.

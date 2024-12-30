@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Pièces</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Barre de navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">EcoLogement</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/gestion_logements.html">Gestion des Logements</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Gestion des Pièces</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="container mt-5">
+        <h1 class="text-center">Gestion des Pièces</h1>
+
+        <!-- Formulaire d'ajout de pièce -->
+        <div class="mt-4">
+            <h3>Ajouter une nouvelle pièce</h3>
+            <form id="formAddPiece">
+                <div class="mb-3">
+                    <label for="nomPiece" class="form-label">Nom de la pièce</label>
+                    <input type="text" class="form-control" id="nomPiece" placeholder="Ex : Salon" required>
+                </div>
+                <div class="mb-3">
+                    <label for="localisationPiece" class="form-label">Localisation (x, y, z)</label>
+                    <input type="text" class="form-control" id="localisationPiece" placeholder="Ex : 0,0,0" required>
+                </div>
+                <div class="mb-3">
+                    <label for="nombreCapteur" class="form-label">Nombre de capteurs</label>
+                    <input type="number" class="form-control" id="nombreCapteur" min="0" value="0" required>
+                </div>
+                <div class="mb-3">
+                    <label for="nombreActionneur" class="form-label">Nombre d'actionneurs</label>
+                    <input type="number" class="form-control" id="nombreActionneur" min="0" value="0" required>
+                </div>
+                <button type="submit" class="btn btn-success">Ajouter</button>
+            </form>
+        </div>
+
+        <!-- Liste des pièces -->
+        <div class="row mt-5" id="piecesContainer">
+            <!-- Les pièces seront chargées ici via JavaScript -->
+        </div>
+    </div>
+
+    <!-- Formulaire de modification de pièce -->
+    <div class="modal fade" id="editPieceModal" tabindex="-1" aria-labelledby="editPieceModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPieceModalLabel">Modifier la pièce</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formEditPiece">
+                        <input type="hidden" id="editPieceId">
+                        <div class="mb-3">
+                            <label for="editNomPiece" class="form-label">Nom de la pièce</label>
+                            <input type="text" class="form-control" id="editNomPiece" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editLocalisationPiece" class="form-label">Localisation (x, y, z)</label>
+                            <input type="text" class="form-control" id="editLocalisationPiece" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editNombreCapteur" class="form-label">Nombre de capteurs</label>
+                            <input type="number" class="form-control" id="editNombreCapteur" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editNombreActionneur" class="form-label">Nombre d'actionneurs</label>
+                            <input type="number" class="form-control" id="editNombreActionneur" min="0" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idLogement = urlParams.get("logementId");
+            const piecesContainer = document.getElementById("piecesContainer");
+            const formEditPiece = document.getElementById("formEditPiece");
+
+            async function fetchPieces(idLogement) {
+                try {
+                    const response = await fetch(`/api/pieces/${idLogement}`);
+                    if (!response.ok) throw new Error("Erreur lors de la récupération des pièces");
+                    const pieces = await response.json();
+                    afficherPieces(pieces);
+                } catch (error) {
+                    console.error(error);
+                    piecesContainer.innerHTML = `<div class="alert alert-danger">Impossible de charger les pièces.</div>`;
+                }
+            }
+
+            function afficherPieces(pieces) {
+                piecesContainer.innerHTML = pieces.map(piece => `
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">${piece.nom_piece}</h5>
+                                <p class="card-text">
+                                    Coordonnées : ${piece.localisation}<br>
+                                    Capteurs : ${piece.nombre_capteur} | Actionneurs : ${piece.nombre_actionneur}
+                                </p>
+                                <button class="btn btn-warning mt-2" onclick="ouvrirFormulaireModification(${piece.id_piece}, '${piece.nom_piece}', '${piece.localisation}', ${piece.nombre_capteur}, ${piece.nombre_actionneur})">Modifier</button>
+                                <button class="btn btn-danger mt-2" onclick="supprimerPiece(${piece.id_piece})">Supprimer</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join("");
+            }
+            
+
+            window.ouvrirFormulaireModification = function (id, nom, localisation, capteurs, actionneurs) {
+                document.getElementById("editPieceId").value = id;
+                document.getElementById("editNomPiece").value = nom;
+                document.getElementById("editLocalisationPiece").value = localisation;
+                document.getElementById("editNombreCapteur").value = capteurs;
+                document.getElementById("editNombreActionneur").value = actionneurs;
+                const modal = new bootstrap.Modal(document.getElementById("editPieceModal"));
+                modal.show();
+            };
+
+            formEditPiece.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const id = document.getElementById("editPieceId").value;
+                const nom = document.getElementById("editNomPiece").value;
+                const localisation = document.getElementById("editLocalisationPiece").value;
+                const capteurs = document.getElementById("editNombreCapteur").value;
+                const actionneurs = document.getElementById("editNombreActionneur").value;
+
+                try {
+                    const response = await fetch(`/api/pieces/${id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ nom_piece: nom, localisation: localisation, nombre_capteur: capteurs, nombre_actionneur: actionneurs })
+                    });
+                    if (!response.ok) throw new Error("Erreur lors de la modification de la pièce");
+                    fetchPieces(idLogement);
+                } catch (error) {
+                    console.error(error);
+                    alert("Impossible de modifier la pièce.");
+                }
+            });
+
+            async function supprimerPiece(id) {
+                if (!confirm("Voulez-vous vraiment supprimer cette pièce ?")) return;
+            
+                try {
+                    const response = await fetch(`/api/pieces/${id}`, {
+                        method: "DELETE",
+                    });
+            
+                    if (!response.ok) {
+                        throw new Error("Erreur lors de la suppression de la pièce");
+                    }
+            
+                    const result = await response.json();
+                    console.log(result);
+            
+                    // Rafraîchir la liste des pièces
+                    const idLogement = new URLSearchParams(window.location.search).get("logementId");
+                    fetchPieces(idLogement);
+                } catch (error) {
+                    console.error("Erreur lors de la suppression :", error);
+                    alert("Impossible de supprimer la pièce.");
+                }
+            }
+            
+
+            if (idLogement) fetchPieces(idLogement);
+        });
+    </script>
+
+    <script>
+        async function supprimerPiece(id) {
+            if (!confirm("Voulez-vous vraiment supprimer cette pièce ?")) return;
+    
+            try {
+                const response = await fetch(`/api/pieces/${id}`, {
+                    method: "DELETE",
+                });
+    
+                if (!response.ok) throw new Error("Erreur lors de la suppression de la pièce");
+    
+                const result = await response.json();
+                console.log(result);
+    
+                // Rafraîchir la liste des pièces
+                const idLogement = new URLSearchParams(window.location.search).get("logementId");
+                fetchPieces(idLogement);
+            } catch (error) {
+                console.error("Erreur lors de la suppression :", error);
+                alert("Impossible de supprimer la pièce.");
+            }
+        }
+    
+        document.getElementById("formAddPiece").addEventListener("submit", async (event) => {
+            event.preventDefault();
+    
+            const nomPiece = document.getElementById("nomPiece").value;
+            const localisationPiece = document.getElementById("localisationPiece").value;
+            const nombreCapteur = parseInt(document.getElementById("nombreCapteur").value, 10);
+            const nombreActionneur = parseInt(document.getElementById("nombreActionneur").value, 10);
+    
+            const idLogement = new URLSearchParams(window.location.search).get("logementId");
+    
+            const pieceData = {
+                nom_piece: nomPiece,
+                localisation: localisationPiece,
+                nombre_capteur: nombreCapteur,
+                nombre_actionneur: nombreActionneur,
+                id_logement: parseInt(idLogement, 10),
+            };
+    
+            try {
+                const response = await fetch(`/api/pieces`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(pieceData),
+                });
+    
+                if (!response.ok) throw new Error("Erreur lors de l'ajout de la pièce");
+    
+                const result = await response.json();
+                console.log(result);
+    
+                document.getElementById("formAddPiece").reset();
+                fetchPieces(idLogement);
+            } catch (error) {
+                console.error("Erreur lors de l'ajout :", error);
+                alert("Impossible d'ajouter la pièce.");
+            }
+        });
+        
+        
+    </script>
+    
+</body>
+</html>

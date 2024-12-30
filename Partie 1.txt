@@ -1,0 +1,34 @@
+Partie 1
+
+Pour la partie 1 il nous a fallut construire les tables et ajouter des enregistrements dans notre base de données :
+
+Question 1/ schéma validé sur papier avec le professeur
+
+Question 2/
+-- Détruire les anciennes tables existantes
+DROP TABLE IF EXISTS Facture;
+DROP TABLE IF EXISTS Mesure;
+DROP TABLE IF EXISTS CapteurActionneur;
+DROP TABLE IF EXISTS TypeCapteurActionneur;
+DROP TABLE IF EXISTS Piece;
+DROP TABLE IF EXISTS Logement;
+
+Question 3/
+lignes 18 a 67 du fichier logement.sql => permet de créer les tables
+
+question 4 /
+ligne 70 a 98 du fichier logement.sql pour la creation d'un logement avec 4 pieces
+
+question 5/
+ligne 100-126 du fichier logement.sql pour la creation des types d'actioneur/capteurs 
+
+Question 6/
+ligne 127 a 157 logement.sql pour créer des capteurs
+
+question 7/
+lignes 160 a 217 logement.SQL pour créer des mesures.
+
+question 8/
+lignes 218 a 234 pour ajouter des factures
+
+reste dans remplissage.py

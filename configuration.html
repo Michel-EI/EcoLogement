@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoLogement - Configuration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .config-section {
+            padding: 50px 0;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #343a40;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">EcoLogement</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="/">Accueil</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/gestion_logements">Gestion des Logements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/consommation">Consommation</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/etat_capteurs">État des Capteurs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/economies">Économies</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/configuration">Configuration</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section class="config-section">
+        <div class="container">
+            <h2>Ajouter ou Supprimer un Capteur</h2>
+            <form id="formAddCapteur">
+                <div class="mb-3">
+                    <label for="logementSelect" class="form-label">Choisissez un logement</label>
+                    <select class="form-select" id="logementSelect" required>
+                        <option value="">-- Sélectionnez un logement --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="pieceSelect" class="form-label">Choisissez une pièce</label>
+                    <select class="form-select" id="pieceSelect" required disabled>
+                        <option value="">-- Sélectionnez un logement d'abord --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="typeCapteurSelect" class="form-label">Type de Capteur</label>
+                    <select class="form-select" id="typeCapteurSelect" required>
+                        <option value="">-- Sélectionnez un type --</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="referenceCommerciale" class="form-label">Référence Commerciale</label>
+                    <input type="text" class="form-control" id="referenceCommerciale" required>
+                </div>
+                <div class="mb-3">
+                    <label for="portCommunication" class="form-label">Port de Communication</label>
+                    <input type="text" class="form-control" id="portCommunication" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Ajouter le Capteur</button>
+            </form>
+            
+            <div class="mt-5">
+                <h3>Liste des Capteurs</h3>
+                <ul id="capteursList" class="list-group">
+                    <!-- Capteurs affichés ici -->
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2024 EcoLogement. Tous droits réservés.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const logementSelect = document.getElementById("logementSelect");
+            const pieceSelect = document.getElementById("pieceSelect");
+            const typeCapteurSelect = document.getElementById("typeCapteurSelect");
+            const capteursList = document.getElementById("capteursList");
+
+            // Fetch logements
+            async function fetchLogements() {
+                const response = await fetch("/api/logements");
+                if (response.ok) {
+                    const logements = await response.json();
+                    logements.forEach(logement => {
+                        const option = document.createElement("option");
+                        option.value = logement.id_logement;
+                        option.textContent = logement.adresse;
+                        logementSelect.appendChild(option);
+                    });
+                }
+            }
+
+            // Fetch pieces for selected logement
+            async function fetchPieces(idLogement) {
+                const response = await fetch(`/api/pieces/${idLogement}`);
+                if (response.ok) {
+                    const pieces = await response.json();
+                    pieceSelect.innerHTML = "<option value=''>-- Sélectionnez une pièce --</option>";
+                    pieces.forEach(piece => {
+                        const option = document.createElement("option");
+                        option.value = piece.id_piece;
+                        option.textContent = piece.nom_piece;
+                        pieceSelect.appendChild(option);
+                    });
+                    pieceSelect.disabled = false;
+                }
+            }
+
+            // Fetch capteurs for selected piece
+            async function fetchCapteurs(idPiece) {
+                const response = await fetch(`/api/capteurs/${idPiece}`);
+                if (response.ok) {
+                    const capteurs = await response.json();
+                    capteursList.innerHTML = "";
+                    capteurs.forEach(capteur => {
+                        const li = document.createElement("li");
+                        li.classList.add("list-group-item");
+                        li.innerHTML = `
+                            ${capteur.reference_commerciale} (${capteur.type_nom})
+                            <button class="btn btn-danger btn-sm float-end" onclick="deleteCapteur(${capteur.id_capteur_actionneur})">Supprimer</button>
+                        `;
+                        capteursList.appendChild(li);
+                    });
+                }
+            }
+
+            // Fetch types of capteurs
+            async function fetchTypesCapteurs() {
+                try {
+                    const response = await fetch("/api/types_capteurs");
+                    if (!response.ok) throw new Error("Erreur lors de la récupération des types de capteurs");
+            
+                    const typesCapteurs = await response.json();
+                    typeCapteurSelect.innerHTML = "<option value=''>-- Sélectionnez un type --</option>";
+                    typesCapteurs.forEach(type => {
+                        const option = document.createElement("option");
+                        option.value = type.id_type;
+                        option.textContent = `${type.nom_type} (${type.unite_mesure})`;
+                        typeCapteurSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error("Erreur :", error);
+                    alert("Impossible de charger les types de capteurs.");
+                }
+            }
+            
+            
+
+            // Delete a capteur
+            async function deleteCapteur(idCapteur) {
+                console.log(`Tentative de suppression pour le capteur avec ID ${idCapteur}`);
+                if (confirm("Voulez-vous vraiment supprimer ce capteur ?")) {
+                    try {
+                        const response = await fetch(`/api/capteurs/${idCapteur}`, { method: "DELETE" });
+                        if (response.ok) {
+                            alert("Capteur supprimé avec succès !");
+                            fetchCapteurs(pieceSelect.value);
+                        } else {
+                            alert("Erreur lors de la suppression du capteur.");
+                        }
+                    } catch (error) {
+                        alert("Erreur : Impossible de supprimer le capteur.");
+                        console.error(error);
+                    }
+                }
+            }
+            
+
+            // Add capteur
+            document.getElementById("formAddCapteur").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const capteurData = {
+                    id_type: typeCapteurSelect.value,
+                    reference_commerciale: document.getElementById("referenceCommerciale").value,
+                    id_piece: pieceSelect.value,
+                    port_communication: document.getElementById("portCommunication").value,
+                };
+
+                const response = await fetch("/api/capteurs", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(capteurData),
+                });
+
+                if (response.ok) {
+                    alert("Capteur ajouté avec succès !");
+                    fetchCapteurs(pieceSelect.value);
+                } else {
+                    alert("Erreur lors de l'ajout du capteur.");
+                }
+            });
+
+            logementSelect.addEventListener("change", () => {
+                const idLogement = logementSelect.value;
+                if (idLogement) fetchPieces(idLogement);
+            });
+
+            pieceSelect.addEventListener("change", () => {
+                const idPiece = pieceSelect.value;
+                if (idPiece) fetchCapteurs(idPiece);
+            });
+
+            await fetchLogements();
+            await fetchTypesCapteurs();
+        });
+    </script>
+</body>
+</html>

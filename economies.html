@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoLogement - Économies</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .chart-section {
+            padding: 50px 0;
+            background-color: #f8f9fa;
+        }
+
+        .chart-container {
+            margin: 0 auto;
+            max-width: 900px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #343a40;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">EcoLogement</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active"  href="/">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/gestion_logements">Gestion des Logements</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/consommation">Consommation</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/etat_capteurs">État des Capteurs</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/economies">Économies</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/configuration">Configuration</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="py-5 bg-light text-center">
+        <h1 class="display-5">Analysez vos économies</h1>
+        <p class="lead">Comparez vos consommations réelles avec une courbe de référence.</p>
+    </header>
+
+    <!-- Chart Section -->
+    <section class="chart-section">
+        <div class="container">
+            <h2>Consommation Électrique</h2>
+            <div class="chart-container">
+                <div id="electricity_chart" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="chart-section">
+        <div class="container">
+            <h2>Consommation d'Eau</h2>
+            <div class="chart-container">
+                <div id="water_chart" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p>&copy; 2024 EcoLogement. Tous droits réservés.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+        google.charts.load('current', { 'packages': ['corechart'] });
+        google.charts.setOnLoadCallback(fetchEconomies);
+
+        async function fetchEconomies() {
+            try {
+                const response = await fetch("/api/economies");
+                if (!response.ok) throw new Error("Erreur lors de la récupération des données");
+                const data = await response.json();
+                drawElectricityChart(data.electrique, data.reference_electrique);
+                drawWaterChart(data.eau, data.reference_eau);
+            } catch (error) {
+                console.error("Erreur :", error);
+            }
+        }
+
+        function drawElectricityChart(consommation, reference) {
+            const dataArray = [['Date', 'Consommation Réelle', 'Référence']];
+            consommation.forEach((point, index) => {
+                dataArray.push([
+                    point.date.split(" ")[0],
+                    point.consommation,
+                    reference[index].reference
+                ]);
+            });
+
+            const data = google.visualization.arrayToDataTable(dataArray);
+
+            const options = {
+                title: 'Consommation Électrique (kWh)',
+                curveType: 'function',
+                legend: { position: 'bottom' }
+            };
+
+            const chart = new google.visualization.LineChart(document.getElementById('electricity_chart'));
+            chart.draw(data, options);
+        }
+
+        function drawWaterChart(consommation, reference) {
+            const dataArray = [['Date', 'Consommation Réelle', 'Référence']];
+            consommation.forEach((point, index) => {
+                dataArray.push([
+                    point.date.split(" ")[0],
+                    point.consommation,
+                    reference[index].reference
+                ]);
+            });
+
+            const data = google.visualization.arrayToDataTable(dataArray);
+
+            const options = {
+                title: 'Consommation d\'Eau (Litres)',
+                curveType: 'function',
+                legend: { position: 'bottom' }
+            };
+
+            const chart = new google.visualization.LineChart(document.getElementById('water_chart'));
+            chart.draw(data, options);
+        }
+    </script>
+</body>
+</html>

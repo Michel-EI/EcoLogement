@@ -1,0 +1,13 @@
+Partie 2
+2.1/
+l'utilisation des méthodes GET et POST des fonctions sur le fichier serveur.py, les fonctions utilisent l'api FastAPI
+
+2.2/ ligne 560 a 577 serveur.py pour visualiser le graphique googlechart des facture
+
+2.3/
+pour la meteo avec utilisation de weatherapi en creant un compte et en renseignant notre token, on peux visualiser la météo selon la route donnée dans le code ligne 612.
+
+2.4/
+Integration des esp code dans ESP_Actionneur qui peremt d'allumer ou non la led en fonction de la temperature mesuré (en dernier) et ESP_Integration pour envoyer les données de températures via l'esp 8266.
+
+
